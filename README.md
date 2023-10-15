@@ -7,6 +7,6 @@ Le makefile considère l'arborescence suivante :
 
 - kernel
    - modules
-    - rootest/ <-- Repo git
-    - linux/ <-- Sources du noyaux
+       - rootest/ <-- Repo git
+       - linux/ <-- Sources du noyaux
 

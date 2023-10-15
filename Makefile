@@ -1,13 +1,13 @@
-obj-m += rootest.o 
+obj-m := rootest.o
+rootest-objs := rootest_main.o kprobes_impl.o
 
-PWD := $(CURDIR) 
+KDIR := ../../linux-5.15.131
+PWD := $(shell pwd)
 
-all: 
+all:
+	make -C $(KDIR) M=$(PWD) modules
 
-		make -C ../../linux-5.15.131 M=$(PWD) modules 
-
-clean: 
-
-		make -C ../../linux-5.15.131 M=$(PWD) clean
+clean:
+	make -C $(KDIR) M=$(PWD) clean
 
 

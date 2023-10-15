@@ -5,6 +5,8 @@
 Le module est compilé out-of-tree.
 Le makefile considère l'arborescence suivante :
 
--> rootest/
--> linux/
+- kernel
+   - modules
+    - rootest/ <-- Repo git
+    - linux/ <-- Sources du noyaux
 

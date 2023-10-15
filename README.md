@@ -8,7 +8,7 @@ Le makefile considère l'arborescence suivante :
 - kernel
    - modules
        - rootest/ <-- Repo git
-       - linux-5.15.131/ <-- Sources du noyaux
+- linux-5.15.131/ <-- Sources du noyaux
     
 
 ## Organisation du développpement :

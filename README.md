@@ -15,4 +15,4 @@ Le makefile considère l'arborescence suivante :
 - On peut écrire nos fonctions chacun dans un fichier séparé !
 - Il n'y a qu'à compléter le fichier rootest.h, et l'importer dans nos fichiers de travail
 - Puis appeler nos fonctions dans l'init du rootest_main.c
-
+- Et enfin éditer le makefile pour rajouter notrefichier.o à la liste des `rootest-objs`

@@ -1,0 +1,16 @@
+# Ignorer tous les fichiers
+*
+
+# Ne pas ignorer les dossiers
+!*/
+
+# Liste des extensions et fichiers qu'on ne veut pas ignorer
+!*.c
+!*.h
+!*.ko
+!*.md
+!*.sh
+!Makefile
+
+# Liste des extensions qu'on veut ignorer
+*.mod.ko

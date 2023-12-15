@@ -11,7 +11,7 @@ static int __init rootkit_init(void) {
 
   printk(KERN_INFO "rootkit: init\n");
   
-	rootkit_init_hook();
+  rootkit_init_hook();
   //hide_from_lsmod();
   //kprobes_init();
 
@@ -41,9 +41,8 @@ static void __exit rootkit_exit(void) {
   printk(KERN_INFO "kprobe %p retiré\n", sig_kp.addr);
 
 
-	rootkit_exit_hook();
+  rootkit_exit_hook();
 }
-
 
 module_init(rootkit_init);
 module_exit(rootkit_exit);

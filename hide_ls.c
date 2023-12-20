@@ -1,10 +1,5 @@
 #include "rootest.h"
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("2600 student");
-MODULE_DESCRIPTION("HOOKING SYSCALL TABLE GETENDS");
-MODULE_VERSION("0.01");
-
 /* pour régler de le kallsyms_lookup_name pas défini (désactivé par sécurité) */
 struct kprobe kp_kln_ls = {
     .symbol_name = "kallsyms_lookup_name"

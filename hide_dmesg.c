@@ -1,10 +1,5 @@
 #include "rootest.h"
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("2600 student");
-MODULE_DESCRIPTION("HOOKING SYSCALL TABLE");
-MODULE_VERSION("0.01");
-
 unsigned long * __sys_call_table;
 
 /* pour régler de le kallsyms_lookup_name pas défini (désactivé par sécurité) */

